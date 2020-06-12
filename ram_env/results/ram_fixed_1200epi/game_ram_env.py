@@ -14,7 +14,7 @@ from doubleDQN import DoubleDQNAgent
 
 ##### 학습 variable
 EPISODES = 5000000
-LOAD_MODEL = True
+LOAD_MODEL = False
 RENDER = True # rendering하며 model play. Rendering 모드에서는 학습하지 않음.
 RANDOM = False
 TOTAL_DDONG = 10
@@ -39,6 +39,10 @@ man_height = 38
 
 if RENDER == False:
     os.environ["SDL_VIDEODRIVER"] = "dummy" # rendering없이 pygame실행하기.
+
+
+def clamp(minimum, x, maximum):
+    return max(minimum,min(x,maximum))
 
 # state구성. 똥좌표, 사람 좌표 붙여 구성.
 def reshape_to_state(ddong_x, ddong_y, man_x, man_y):
@@ -73,6 +77,8 @@ def playgame(gamepad,man,ddong,clock,agent):
     # 초기 state
     state = reshape_to_state(ddong_x, ddong_y, man_x, man_y)
     action = 0
+    min_action = -1.0
+    max_action = 1.0
     dx = 0
     # 게임 진행.
     while not end_game:
@@ -82,14 +88,17 @@ def playgame(gamepad,man,ddong,clock,agent):
         #if epi_step % 4 == 0: #4단위 frameskip. 4step씩 같은 행동 취하기.
         action = agent.get_action(state)
 
-        # action에 따른 위치변화.
-        if action == 1:
-            dx -= 48
-        elif action == 2:
-            dx += 48
-        elif action == 0:
-            dx = 0
-
+        #discrete action
+#        # action에 따른 위치변화.
+#        if action == 1:
+#            dx -= 48
+#        elif action == 2:
+#            dx += 48
+#        elif action == 0:
+#            dx = 0
+        #continuous action
+        action = clamp(min_action,action,max_action)
+        dx = action*48
         # ---여기부터 해당 action에 대해 step
         # 사람 이동
         man_x += dx
@@ -167,8 +176,8 @@ if __name__ == "__main__":
     if LOAD_MODEL == True:
         agent.load_model() #@@@@@@@@@모델 로드
         agent.epsilon = agent.epsilon_min
-    if RENDER == True: # rendering 모델 테스트
-        agent.epsilon = -1
+    #if RENDER == True: # rendering 모델 테스트
+    #    agent.epsilon = -1
 
     for e in range(EPISODES):
         epi_step, score = playgame(gamepad,man,ddong,clock,agent)
