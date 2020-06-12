@@ -18,6 +18,10 @@ ddong_height = 26
 man_width = 36
 man_height = 38
 
+
+def clamp(minimum, x, maximum):
+    return max(minimum, min(x, maximum))
+
 def playgame(gamepad,man,ddong,clock):
     end_game = False
     #position
@@ -26,8 +30,12 @@ def playgame(gamepad,man,ddong,clock):
     
     #added velocity (-10 ~ +10)
     man_velocity = 0.1
+    max_action = 1.0
+    min_action = -1.0
+    max_speed=5.0
+    man_force = 0.01
     ddong_x, ddong_y = [], []
-    ddong_speed = 10
+    ddong_speed = 5
     ddong_total_cnt = 10
     score = 0
     
@@ -45,18 +53,32 @@ def playgame(gamepad,man,ddong,clock):
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    dx -= 5
+                    dx -= 0
                 elif event.key == pygame.K_RIGHT:
-                    dx += 5
+                    dx += 0
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                     dx = 0
 
         gamepad.fill(BLACK)
+    
+        keys_pressed = pygame.key.get_pressed()
+        force_cnt=0
+        if keys_pressed[pygame.K_LEFT]:
+            force_cnt-=0.02
+    
+        if keys_pressed[pygame.K_RIGHT]:
+            force_cnt+=0.02
+    
+        force = min(max(force_cnt,min_action),max_action)
+        man_velocity += force
+        
+        if(man_velocity > max_speed): man_velocity = max_speed
+        if(man_velocity < -max_speed): man_velocity = -max_speed
 
         # 사람 이동
-        man_x += dx
+        man_x += man_velocity
         if man_x < 0:
             man_x = 0
         elif man_x > PAD_WIDTH - man_width:
