@@ -4,6 +4,8 @@ import pygame
 import random
 from time import sleep
 
+import os
+
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 #게임화면 크기
@@ -18,13 +20,17 @@ man_height = 38
 
 def playgame(gamepad,man,ddong,clock):
     end_game = False
+    #position
     man_x = PAD_WIDTH * 0.5
     man_y = PAD_HEIGHT * 0.9
+    
+    #added velocity (-10 ~ +10)
+    man_velocity = 0.1
     ddong_x, ddong_y = [], []
     ddong_speed = 10
     ddong_total_cnt = 10
     score = 0
-
+    
     #초기 똥 추가
     for i in range(ddong_total_cnt):
         ddong_x.append(random.randrange(0,PAD_WIDTH - man_width))
